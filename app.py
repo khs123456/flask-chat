@@ -1,6 +1,7 @@
 import os
 import json
 import random
+import requests
 from flask import Flask, request, jsonify
 
 app = Flask(__name__)
@@ -27,7 +28,7 @@ def keyboard():
 def message():
     # content라는 key의 value를 msg에 json타입으로 저장
     msg = request.json['content']
-    
+    img_bool = False
     if msg == "메뉴":
         menu = ["20층", "멀캠식당", "꼭대기", "급식"]
         return_msg = random.choice(menu)
@@ -37,19 +38,38 @@ def message():
         pick = random.sample(number,6)
         # list를 string으로 변환을 시켜줘야 return_msg가 될 자격이 생긴다.
         return_msg = str(pick)
+    elif msg == "고양이":
+        img_bool = True
+        url = "https://api.thecatapi.com/v1/images/search?mime_type=jpg"
+        req = requests.get(url).json()
+        cat_url = req[0]['url']
     else:
         return_msg = "아직 지원하지 않습니다."
         
-    
-    json_return = {
-        "message":{
-            "text" : return_msg
-        },
-        "keyboard": {
-            "type" : "buttons",
-            "buttons" : ["메뉴", "로또", "고양이", "영화"]
+    if img_bool == True:
+        json_return = {
+            "message":{
+                "photo": {
+                    "url": cat_url,
+                    "width": 720,
+                    "height": 640
+                }
+            },
+            "keyboard": {
+                "type" : "buttons",
+                "buttons" : ["메뉴", "로또", "고양이", "영화"]
+            }
         }
-    }
+    else:    
+        json_return = {
+            "message":{
+                "text" : return_msg
+            },
+            "keyboard": {
+                "type" : "buttons",
+                "buttons" : ["메뉴", "로또", "고양이", "영화"]
+            }
+        }
     
     # jsonify도 json.dumps와 똑같은 기능을 한다. 취사선택하면 됨.
     return jsonify(json_return)
