@@ -1,5 +1,6 @@
 import os
 import json
+import random
 from flask import Flask, request, jsonify
 
 app = Flask(__name__)
@@ -27,9 +28,22 @@ def message():
     # content라는 key의 value를 msg에 json타입으로 저장
     msg = request.json['content']
     
+    if msg == "메뉴":
+        menu = ["20층", "멀캠식당", "꼭대기", "급식"]
+        return_msg = random.choice(menu)
+    elif msg == "로또":
+        # range(1,46)을 반드시 list로 감싸줘야 원하는 형태가 된다.
+        number = list(range(1,46))
+        pick = random.sample(number,6)
+        # list를 string으로 변환을 시켜줘야 return_msg가 될 자격이 생긴다.
+        return_msg = str(pick)
+    else:
+        return_msg = "아직 지원하지 않습니다."
+        
+    
     json_return = {
         "message":{
-            "text" : msg
+            "text" : return_msg
         },
         "keyboard": {
             "type" : "buttons",
